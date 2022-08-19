@@ -108,7 +108,7 @@ class AccountEdiFormat(models.Model):
 
         builder = self._get_xml_builder(invoice.company_id)
         # For now, the errors are not displayed anywhere, don't want to annoy the user
-        xml_content, errors = builder._export_invoice(invoice)
+        xml_content, _ = builder._export_invoice(invoice)
 
         # DEBUG: send directly to the test platform (the one used by ecosio)
         #response = self.env['account.edi.common']._check_xml_ecosio(invoice, xml_content, builder._export_invoice_ecosio_schematrons())
@@ -123,20 +123,8 @@ class AccountEdiFormat(models.Model):
         if self.code not in ['facturx_1_0_05', 'efff_1']:
             attachment_create_vals.update({'res_id': invoice.id, 'res_model': 'account.move'})
 
-        attachment = self.env['ir.attachment'].with_user(SUPERUSER_ID).create(attachment_create_vals)
-
-        res = {invoice: {'attachment': attachment}}
-        if errors and self.code == 'facturx_1_0_05':
-            res[invoice].update({
-                'success': False,
-                'error': _("Errors occured while creating the EDI document (format: %s). The receiver "
-                           "might refuse it.", builder._description)
-                         + '<p> <li>' + "</li> <li>".join(errors) + '</li> </p>',
-                'blocking_level': 'info',
-            })
-        else:
-            res[invoice]['success'] = True
-        return res
+        attachment = self.env['ir.attachment'].create(attachment_create_vals)
+        return {invoice: {'success': True, 'attachment': attachment}}
 
     def _get_move_applicability(self, move):
         # EXTENDS account_edi
