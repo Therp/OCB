@@ -69,18 +69,6 @@
                             </ram:ApplicableTradeTax>
                         </t>
 
-                        <!-- Allowance/Charge on the line -->
-                        <t t-foreach="line_vals.get('allowance_charge_vals_list')" t-as="allowance_charge_vals">
-                            <ram:SpecifiedTradeAllowanceCharge>
-                                <ram:ChargeIndicator>
-                                    <udt:Indicator t-esc="allowance_charge_vals['indicator']"/>
-                                </ram:ChargeIndicator>
-                                <ram:ActualAmount t-esc="format_monetary(allowance_charge_vals['amount'], 2)"/>
-                                <ram:ReasonCode t-esc="allowance_charge_vals['reason_code']"/>
-                                <ram:Reason t-esc="allowance_charge_vals['reason']"/>
-                            </ram:SpecifiedTradeAllowanceCharge>
-                        </t>
-
                         <!-- Subtotal. -->
                         <ram:SpecifiedTradeSettlementLineMonetarySummation>
                             <ram:LineTotalAmount t-esc="format_monetary(line_vals['line_total_amount'], 2)"/>

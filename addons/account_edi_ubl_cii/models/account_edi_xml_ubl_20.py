@@ -739,6 +739,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             'allowance_charge_reason_code': './{*}AllowanceChargeReasonCode',
             'line_total_amount': './{*}LineExtensionAmount',
         }
+        self._import_fill_invoice_line_values(tree, xpath_dict, invoice_line, qty_factor)
 
         # Taxes
         inv_line_vals = self._import_fill_invoice_line_values(tree, xpath_dict, invoice_line, qty_factor)
@@ -746,35 +747,8 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         tax_nodes = tree.findall('.//{*}Item/{*}ClassifiedTaxCategory/{*}Percent')
         if not tax_nodes:
             for elem in tree.findall('.//{*}TaxTotal'):
-                percentage_nodes = elem.findall('.//{*}TaxSubtotal/{*}TaxCategory/{*}Percent')
-                if not percentage_nodes:
-                    percentage_nodes = elem.findall('.//{*}TaxSubtotal/{*}Percent')
-                tax_nodes += percentage_nodes
+                tax_nodes += elem.findall('.//{*}TaxSubtotal/{*}Percent')
         return self._import_fill_invoice_line_taxes(journal, tax_nodes, invoice_line, inv_line_vals, logs)
-
-    def _correct_invoice_tax_amount(self, tree, invoice):
-        """ The tax total may have been modified for rounding purpose, if so we should use the imported tax and not
-         the computed one """
-        # For each tax in our tax total, get the amount as well as the total in the xml.
-        for elem in tree.findall('.//{*}TaxTotal/{*}TaxSubtotal'):
-            percentage = elem.find('.//{*}TaxCategory/{*}Percent')
-            if percentage is None:
-                percentage = elem.find('.//{*}Percent')
-            amount = elem.find('.//{*}TaxAmount')
-            if (percentage is not None and percentage.text is not None) and (amount is not None and amount.text is not None):
-                tax_percent = float(percentage.text)
-                # Compare the result with our tax total on the invoice, and apply correction if needed.
-                # First look for taxes matching the percentage in the xml.
-                taxes = invoice.line_ids.tax_line_id.filtered(lambda tax: tax.amount == tax_percent)
-                # If we found taxes with the correct amount, look for a tax line using it, and correct it as needed.
-                if taxes:
-                    tax_total = float(amount.text)
-                    tax_line = invoice.line_ids.filtered(lambda line: line.tax_line_id in taxes)[:1]
-                    if tax_line:
-                        sign = -1 if invoice.is_inbound(include_receipts=True) else 1
-                        tax_line_amount = abs(tax_line.amount_currency)
-                        if abs(tax_total - tax_line_amount) <= 0.05:
-                            tax_line.amount_currency = tax_total * sign
 
     # -------------------------------------------------------------------------
     # IMPORT : helpers
