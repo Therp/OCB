@@ -32,7 +32,7 @@
                     <!-- Amounts. -->
                     <ram:SpecifiedLineTradeAgreement>
                         <!-- Line information: unit_price
-                        NB: the gross_price_unit should be the price tax excluded !
+                        NB: the gross_price_unit should be the price tax excluded!
                         if price_unit = 100 and tax 10% price_include -> then the gross_price_unit is 91
                         -->
                         <ram:GrossPriceProductTradePrice>
@@ -56,7 +56,7 @@
                     <ram:SpecifiedLineTradeDelivery>
                         <ram:BilledQuantity
                                 t-att-unitCode="line_vals.get('unece_uom_code')"
-                                t-out="line.quantity"/> <!-- /!\ The quantity is the line.quantity since we keep the unece_uom_code ! -->
+                                t-out="line_vals.get('quantity')"/>
                     </ram:SpecifiedLineTradeDelivery>
 
                     <ram:SpecifiedLineTradeSettlement>
@@ -67,6 +67,18 @@
                                 <ram:CategoryCode t-out="tax_detail_vals['tax_category_code']"/>
                                 <ram:RateApplicablePercent t-out="tax_detail_vals['amount']"/>
                             </ram:ApplicableTradeTax>
+                        </t>
+
+                        <!-- Allowance/Charge on the line -->
+                        <t t-foreach="line_vals.get('allowance_charge_vals_list')" t-as="allowance_charge_vals">
+                            <ram:SpecifiedTradeAllowanceCharge>
+                                <ram:ChargeIndicator>
+                                    <udt:Indicator t-esc="allowance_charge_vals['indicator']"/>
+                                </ram:ChargeIndicator>
+                                <ram:ActualAmount t-esc="format_monetary(allowance_charge_vals['amount'], 2)"/>
+                                <ram:ReasonCode t-esc="allowance_charge_vals['reason_code']"/>
+                                <ram:Reason t-esc="allowance_charge_vals['reason']"/>
+                            </ram:SpecifiedTradeAllowanceCharge>
                         </t>
 
                         <!-- Subtotal. -->
@@ -96,7 +108,7 @@
                         <ram:CompleteNumber t-out="partner.phone or partner.mobile"/>
                     </ram:TelephoneUniversalCommunication>
                     <ram:EmailURIUniversalCommunication t-if="partner.email">
-                        <ram:URIID schemeID='SMTP' t-out="partner.email"/>
+                        <ram:URIID t-out="partner.email"/>
                     </ram:EmailURIUniversalCommunication>
                 </ram:DefinedTradeContact>
 
