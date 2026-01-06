@@ -649,6 +649,11 @@ class ConnectionPool(object):
                 self._connections.append((cnx, False))
                 _logger.info('%r: Free leaked connection to %r', self, cnx.dsn)
 
+        _logger.info(
+            "CONNX %s connections (thread=%s)",
+            len(self._connections),
+            str(threading.current_thread().ident)
+        )
         for i, (cnx, used) in enumerate(self._connections):
             if not used and self._dsn_equals(cnx.dsn, connection_info):
                 try:
