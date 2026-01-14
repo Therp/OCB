@@ -652,7 +652,7 @@ class ConnectionPool(object):
         _logger.info(
             "CONNX %s connections (thread=%s)",
             len(self._connections),
-            str(threading.current_thread().ident)
+            str(threading.current_thread().ident),
         )
         for i, (cnx, used) in enumerate(self._connections):
             if not used and self._dsn_equals(cnx.dsn, connection_info):
