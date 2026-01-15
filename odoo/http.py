@@ -2251,6 +2251,7 @@ class Application:
                 request._post_init()
                 current_thread.url = httprequest.url
 
+                _logger.info("CONNX ReQuEsT %s - %s - %s - %s - %s", environ.get("REQUEST_METHOD"), environ.get("REQUEST_URI"), environ.get("HTTP_USER_AGENT"), environ.get("HTTP_REFERER"), environ.get("REMOTE_ADDR"))
                 if self.get_static_file(httprequest.path):
                     response = request._serve_static()
                 elif request.db:
