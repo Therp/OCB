@@ -742,6 +742,7 @@ class Connection(object):
         self.__dbname = dbname
         self.__dsn = dsn
         self.__pool = pool
+        self.pool = pool
 
     @property
     def dsn(self):

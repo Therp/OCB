@@ -1858,6 +1858,12 @@ class Request:
         """
         ir_http = self.registry['ir.http']
 
+        if len(self.registry._db.pool._connections) > 20:
+            _logger.info(
+                "CONNX %i req %s",
+                len(self.registry._db.pool._connections),
+                self.httprequest.path
+            )
         try:
             rule, args = ir_http._match(self.httprequest.path)
         except NotFound:
@@ -2251,7 +2257,6 @@ class Application:
                 request._post_init()
                 current_thread.url = httprequest.url
 
-                _logger.info("CONNX ReQuEsT %s - %s - %s - %s - %s", environ.get("REQUEST_METHOD"), environ.get("REQUEST_URI"), environ.get("HTTP_USER_AGENT"), environ.get("HTTP_REFERER"), environ.get("REMOTE_ADDR"))
                 if self.get_static_file(httprequest.path):
                     response = request._serve_static()
                 elif request.db:
