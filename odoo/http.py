@@ -1859,6 +1859,12 @@ class Request:
         """
         ir_http = self.registry['ir.http']
 
+        if len(self.registry._db.pool._connections) > 20:
+            _logger.info(
+                "CONNX %i req %s",
+                len(self.registry._db.pool._connections),
+                self.httprequest.path
+            )
         try:
             rule, args = ir_http._match(self.httprequest.path)
         except NotFound:
